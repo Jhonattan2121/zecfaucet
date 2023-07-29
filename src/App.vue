@@ -5,7 +5,7 @@
 
     <ReceiveZec v-bind:payout="payout"/>
 
-    <FaucetBalance v-bind:balance="balance"/>
+    <FaucetBalance v-bind:balance="balance" v-bind:donate="donate" />
     
     <h2>Zcash price:</h2>
     <center>
@@ -29,16 +29,23 @@ export default {
   },
   mounted: function() {
     this.getFaucetPayout();
+    this.getDonateAddress();
     this.updateFaucetBalance();
   },
   data: () => ({
     balance: 0,
-    payout: 0.0
+    payout: 0.0,
+    donate: ''
   }),
   methods: {
     getFaucetPayout() {
       http.get('/payout').then((res) => {
         this.payout = res.data;
+      });
+    },
+    getDonateAddress() {
+      http.get('/donate').then((res)=>{
+        this.donate = res.data;
       });
     },
     getFaucetBalance() {
@@ -64,5 +71,8 @@ export default {
   text-align: center;
   color: #2c3e50;
   margin-top: 60px;
+  width: 80%;
+  margin-left: auto;
+  margin-right: auto;
 }
 </style>

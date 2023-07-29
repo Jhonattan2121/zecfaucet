@@ -1,3 +1,5 @@
+const { Worker, workerData } = require('worker_threads');
+
 const express = require('express');
 const bodyParser = require('body-parser')
 const cors = require('cors')
@@ -11,13 +13,13 @@ const app = express();
 const port = 8081;
 
 // Set faucet payout in decimal ZEC
-const payout = 0.0005;
+const payout = 0.0003;
 const memo = "Thanks for using ZecFaucet.com"
 
 // Queue for the faucet payout
 let queue = [];
 const waitlist = [];
-const waittime = 15; // Wait 15 minuts before next claim
+const waittime = 5; // Wait 15 minuts before next claim
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json()) // to convert the request into JSON
@@ -28,16 +30,23 @@ app.set("trust proxy", true);
 // app.use(express.static(path.join(__dirname, 'dist')));
 
 // Setup lib
-const zingo = new LiteWallet("https://mainnet.lightwalletd.com:9067/");
+const lwd = "https://mainnet.lightwalletd.com:9067/";
+const zingo = new LiteWallet(lwd);
 let syncing = true;
 
 // Initialize zingolib
 zingo.init().then(() => {    
     syncing = false; // Wallet is sync'ed
-    // Send payments every 45 seconds
-    setInterval(() => {
-        // console.log(queue);
-    }, 45 * 1000);    
+
+    // Send payments every 1 minute
+    setInterval(async() => {
+        if(queue.length > 0 && !zingo.getSendProgress().sending) {                                    
+            // Sending blocks node event loop, so run in another thread
+            const worker = new Worker(path.join(__dirname, 'send.js'), { workerData: {server: lwd, send: queue} });               
+            // clear the queue
+            queue = [];
+        }
+    }, 60 * 1000);
 });
 
 // Serve the Vue.js app
@@ -45,21 +54,26 @@ zingo.init().then(() => {
 //     res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 // });
 
-app.get ('/payout', async (req, res) =>{
+app.get ('/payout', (req, res) =>{
     res.send(`${payout}`);
 });
 
-app.get('/balance', async (req, res) =>{
+app.get('/donate', (req, res) => {
+    const addr = zingo.fetchAllAddresses();
+    res.send(addr[0].address);
+});
+
+app.get('/balance', (req, res) =>{
     // If syncing, return balance of 0.0
     if(syncing) res.send('0.0');
     else {
         // Fetch total balance and return        
-        const bal = await zingo.fetchTotalBalance();        
+        const bal = zingo.fetchTotalBalance();        
         res.send(`${bal.total}`);
     }
 });
 
-app.post('/add', async (req, res) => {
+app.post('/add', (req, res) => {
     if(syncing) res.send('syncing');
     else {
         // CHeck if it is a valid address
@@ -91,14 +105,14 @@ app.post('/add', async (req, res) => {
             // Get sendJson
             const sendJson = tx.getSendJSON();
             
+            // Add tx to the queue
+            queue.push(sendJson[0]);
+            
             // Add user IP to the wait list
             waitlist.push({
                 ip: userIp,
                 timestamp: timeStamp
             });
-
-            // Add tx to the queue
-            queue.push(sendJson[0]);
 
             res.send('success');
         }

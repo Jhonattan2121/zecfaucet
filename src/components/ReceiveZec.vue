@@ -1,6 +1,7 @@
 <template>    
     <div class="faucet">
         <h3>Enter you Zcash address to receive {{ payout }} ZEC:</h3>
+        <p>Don't have a Zcash wallet? Find the best wallet <a href="https://z.cash/wallets">here</a>.</p>
         <input class="user-address" type="text" v-model="address">
         <button class="receive-zec" @click="claim" v-bind:disabled="disable_btn">Send</button>
         <div class="invalid-address" v-if="syncing">It looks like the backend wallet is not synchronized! Please wait a few minutes and try again.</div>
