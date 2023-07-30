@@ -42,14 +42,14 @@ export default {
                     this.greedy = true;
                 }
                 
-                // Re-enable button and clear messages after 20 seconds
+                // Re-enable button and clear messages after 15 seconds
                 setTimeout(()=> {
                     this.disable_btn = false;
                     this.syncing = false;
                     this.invalid = false;
                     this.success = false;
                     this.greedy = false;
-                }, 5*1000);
+                }, 15*1000);
             });
         }
     }

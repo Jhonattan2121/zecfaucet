@@ -1,25 +1,30 @@
-const { Worker, workerData } = require('worker_threads');
+const { Worker } = require('worker_threads');
 
 const express = require('express');
 const bodyParser = require('body-parser')
 const cors = require('cors')
 
+const https = require('https');
+const fs = require('fs');
+
 const path = require('path');
+
+const useHttps = false;
 
 const LiteWallet = require('./zingolib-wrapper/litewallet');
 const { TxBuilder } = require('./zingolib-wrapper/utils/utils');
 
 const app = express();
-const port = 8081;
+const port = 2653;
 
 // Set faucet payout in decimal ZEC
-const payout = 0.0003;
+const payout = 0.0005;
 const memo = "Thanks for using ZecFaucet.com"
 
 // Queue for the faucet payout
 let queue = [];
 const waitlist = [];
-const waittime = 5; // Wait 15 minuts before next claim
+const waittime = 15; // Time in minuts before next claim
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json()) // to convert the request into JSON
@@ -120,6 +125,16 @@ app.post('/add', (req, res) => {
     }
 });
 
-app.listen(port, () => {
+if(useHttps) {
+    const options = {
+        key: fs.readFileSync('path_to_key.pem'),
+        cert: fs.readFileSync('path_to_cert.pem')
+    };
+    https.createServer(options, app).listen(port);
     console.log(`App listening at http://localhost:${port}`)
-});
+}
+else {
+    app.listen(port, () => {
+        console.log(`App listening at http://localhost:${port}`)
+    });
+}
