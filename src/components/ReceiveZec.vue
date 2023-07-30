@@ -1,5 +1,5 @@
 <template>    
-    <div class="faucet">
+    <div class="row">
         <h3>Enter you Zcash address to receive {{ payout }} ZEC:</h3>
         <p>Don't have a Zcash wallet? Find the best wallet <a href="https://z.cash/wallets">here</a>.</p>
         <input class="user-address" type="text" v-model="address">
@@ -58,14 +58,13 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-.user-address {
-    width: 400px;;
+.user-address {    
     padding: 16px;
+    width: 75%;
 }
 
 .receive-zec {    
-    font-size: 16px;
-    padding: 16px;
+    font-size: 16px;    
 }
 .invalid-address {
     background-color:coral;

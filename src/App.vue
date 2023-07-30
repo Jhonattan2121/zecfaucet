@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="container">
     <img alt="Vue logo" src="./assets/zecfaucet.png"> 
     <h1>Welcome to ZecFaucet.com</h1>  
 
@@ -7,11 +7,13 @@
 
     <FaucetBalance v-bind:balance="balance" v-bind:donate="donate" />
     
-    <h2>Zcash price:</h2>
-    <center>
-      <coingecko-coin-ticker-widget coin-id="zcash" currency="usd" locale="en" width="500"></coingecko-coin-ticker-widget>    
-    </center>
-    <hr/>
+    <div class="row">
+      <h2>Zcash price:</h2>
+      
+        <coingecko-coin-ticker-widget coin-id="zcash" currency="usd" locale="en" ></coingecko-coin-ticker-widget>    
+      
+      <hr/>
+    </div>
     <p>ZecFaucet.com is not afiliated with ECC or Zcash Foundation.</p>
   </div>
 </template>

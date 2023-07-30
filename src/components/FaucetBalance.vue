@@ -1,10 +1,13 @@
 <template>
-    <div class="balance">
+    <div class="row">
+        
         <h2>Faucet balance:</h2>
-        <span class="faucet-balance"> {{ balance }} ZEC</span>
-        <h4>Donate to ZecFaucet.com:</h4>
+        <span class="faucet-balance"> {{ balance }} ZEC</span>        
+        
+        <h4 class="donate">Donate to ZecFaucet.com:</h4>
         <!-- <textarea class="donation-address" v-model="donate" disabled></textarea> -->
         <span class="donation-address">{{ donate }}</span>
+        
     </div>
 </template>
   
@@ -31,13 +34,16 @@ props: {
     color: black;
 }
 
+.donate {
+    margin-top: 32px;
+}
 .donation-address {
     background-color: lightgrey;
     display: block;
-    width: 480px;
+    /* width: 480px; */
     /* height: 180px; */
     padding: 16px;
     overflow-wrap: break-word;
-    margin: auto;
+    margin-bottom: 32px
 }
 </style>
