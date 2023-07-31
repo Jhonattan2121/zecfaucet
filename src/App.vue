@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <img alt="Vue logo" src="./assets/zecfaucet.png"> 
+    <img alt="ZecFaucet.com" src="./assets/zecfaucet1.png"> 
     <h1>Welcome to ZecFaucet.com</h1>  
 
     <ReceiveZec v-bind:payout="payout"/>
