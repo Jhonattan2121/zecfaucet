@@ -28,6 +28,11 @@ $ npm run build
 
 Coopy `./dist` contents to webserver directory
 
+Run the backend service
+```
+$ node server.js
+```
+
 or
 
 Run a dev environment locally
