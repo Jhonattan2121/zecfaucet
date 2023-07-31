@@ -43,15 +43,15 @@ let syncing = true;
 zingo.init().then(() => {    
     syncing = false; // Wallet is sync'ed
 
-    // Send payments every 1 minute
+    // Send payments every 2 minutes
     setInterval(async() => {
         if(queue.length > 0 && !zingo.getSendProgress().sending) {                                    
-            // Sending blocks node event loop, so run in another thread
+            // Sending tx blocks the node event loop, so run in another thread
             const worker = new Worker(path.join(__dirname, 'send.js'), { workerData: {server: lwd, send: queue} });               
             // clear the queue
             queue = [];
         }
-    }, 60 * 1000);
+    }, 2 * 60 * 1000);
 });
 
 // Serve the Vue.js app
@@ -74,7 +74,7 @@ app.get('/balance', (req, res) =>{
     else {
         // Fetch total balance and return        
         const bal = zingo.fetchTotalBalance();        
-        res.send(`${bal.total}`);
+        res.send(`${bal.total.toFixed(8)}`);
     }
 });
 
@@ -131,7 +131,7 @@ if(useHttps) {
         cert: fs.readFileSync('path_to_cert.pem')
     };
     https.createServer(options, app).listen(port);
-    console.log(`App listening at http://localhost:${port}`)
+    console.log(`App listening at https://localhost:${port}`)
 }
 else {
     app.listen(port, () => {

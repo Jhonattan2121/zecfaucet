@@ -70,8 +70,9 @@ export default {
     background-color:coral;
     color: black;
     font-weight: bold;
-    width: 500px;
+    width: 75%;
     margin-top: 16px;
+    margin-bottom: 16px;
     margin-left: auto;
     margin-right: auto;
     padding: 8px;
@@ -81,8 +82,9 @@ export default {
     background-color:yellowgreen;
     color: black;
     font-weight: bold;
-    width: 500px;
+    width: 75%;
     margin-top: 16px;
+    margin-bottom: 16px;
     margin-left: auto;
     margin-right: auto;
     padding: 8px;
@@ -91,8 +93,9 @@ export default {
     background-color:aquamarine;
     color: black;
     font-weight: bold;
-    width: 500px;
+    width: 75%;
     margin-top: 16px;
+    margin-bottom: 16px;
     margin-left: auto;
     margin-right: auto;
     padding: 8px;
