@@ -48,7 +48,7 @@ zingo.init().then(() => {
         if(queue.length > 0 && !zingo.getSendProgress().sending) {                                    
             // Sending tx blocks the node event loop, so run in another thread
             const worker = new Worker(path.join(__dirname, 'send.js'), { workerData: {server: lwd, send: queue} });               
-            // clear the queue
+            // clear the queue            
             queue = [];
         }
     }, 2 * 60 * 1000);
@@ -63,7 +63,7 @@ app.get ('/payout', (req, res) =>{
     res.send(`${payout}`);
 });
 
-app.get('/donate', (req, res) => {
+app.get('/donate', (req, res) => {    
     const addr = zingo.fetchAllAddresses();
     res.send(addr[0].address);
 });
@@ -87,8 +87,9 @@ app.post('/add', (req, res) => {
         if(validAddr) {
             // First, check if user can claim faucet
             const userIp = req.ip;
+            const userFp = req.body.fingerprint;
             const timeStamp = new Date();
-            const user = waitlist.filter(el => el.ip === userIp);
+            const user = waitlist.filter(el => (el.ip === userIp || el.fp === userFp));
             if(user.length > 0) {
                 const oldTimeStamp = user[0].timestamp;
                 const nextClaim = waittime - ((timeStamp - oldTimeStamp) / (1000*60));
@@ -116,6 +117,7 @@ app.post('/add', (req, res) => {
             // Add user IP to the wait list
             waitlist.push({
                 ip: userIp,
+                fp: userFp,
                 timestamp: timeStamp
             });
 
@@ -138,3 +140,10 @@ else {
         console.log(`App listening at http://localhost:${port}`)
     });
 }
+
+process.on('SIGINT', () => {
+    console.log("Safely shutdown zingolib");
+
+    zingo.deinitialize();
+    process.exit();
+});

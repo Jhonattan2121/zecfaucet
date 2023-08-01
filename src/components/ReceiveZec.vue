@@ -1,5 +1,5 @@
 <template>    
-    <div class="row">
+    <div class="row">        
         <h3>Enter you Zcash address to receive {{ payout }} ZEC:</h3>
         <p>Don't have a Zcash wallet? Find the best wallet <a href="https://z.cash/wallets">here</a>.</p>
         <input class="user-address" type="text" v-model="address">
@@ -14,13 +14,25 @@
   
 <script>
 import http from '../http-common';
+import getBrowserFingerprint from 'get-browser-fingerprint';
+
 export default {
     name: 'ReceiveZec',
     props: {
         payout: Number
     },
+    mounted: function() {
+        const opt = {
+            hardwareOnly: false,
+            enableWebgl: true,
+            debug: false
+        }
+        const fp = getBrowserFingerprint(opt);
+        this.fingerprint = fp;
+    },
     data: () =>({
         address: "",
+        fingerprint: "",
         syncing: false,
         success: false,
         invalid: false,
@@ -33,7 +45,7 @@ export default {
             // Disable claim button
             this.disable_btn = true;     
             
-            http.post("/add", {address: this.address}).then((res) => {                
+            http.post("/add", {address: this.address, fingerprint: this.fingerprint}).then((res) => {                
                 if(res.data === 'syncing') this.syncing = true;
                 else if(res.data === 'success') this.success = true;
                 else if(res.data === 'invalid') this.invalid = true;
@@ -49,6 +61,7 @@ export default {
                     this.invalid = false;
                     this.success = false;
                     this.greedy = false;
+                    this.address = "";
                 }, 15*1000);
             });
         }
