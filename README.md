@@ -20,7 +20,7 @@ You'll need rust, openssl-dev and a few other dependencies.
 Edit `src/http-common.js` and change `baseURL` to your ip address or domain.
 
 Edit `/src/components/ReceiveZec.vue` and change `vue-hcaptcha sitekey` to your hcaptcha site key.
-Edit `.dot` and set `HCAPTCHA_SECRET` to your hcaptcha secret key.
+Edit `.env` and set `HCAPTCHA_SECRET` to your hcaptcha secret key.
 
 Edit `server.js` if using https change `useHttps` to `true` and configure the certificates at the bottom of the file.
 
