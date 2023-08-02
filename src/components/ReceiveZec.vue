@@ -4,10 +4,13 @@
         <p>Don't have a Zcash wallet? Find the best wallet <a href="https://z.cash/wallets">here</a>.</p>
         <input class="user-address" type="text" v-model="address">
         <button class="receive-zec" @click="claim" v-bind:disabled="disable_btn">Send</button>
+        <div class="invalid-address" v-if="solveCaptcha">Please solve the captcha before claiming.</div>
+        <div class="invalid-address" v-if="invalidCaptcha">Sorry, we coudn't verify you're not a robot.</div>
         <div class="invalid-address" v-if="syncing">It looks like the backend wallet is not synchronized! Please wait a few minutes and try again.</div>
         <div class="invalid-address" v-if="invalid">Invalid address! Please verify if you entered your Zcash address corectly and try again.</div>
         <div class="success" v-if="success">Success! Your address has been added to the payout queue. In a few minutes you will receive {{ payout }} ZEC.</div>
         <div class="greedy" v-if="greedy">Please wait {{ waitfor}} minutes before claiming again.</div>
+        <vue-hcaptcha sitekey="b72d3642-0e4a-4ed5-b859-4f6100592d26" @verify="captcchaVerify" @expired="captchaExpired"></vue-hcaptcha>
     </div>    
     
 </template>
@@ -15,12 +18,14 @@
 <script>
 import http from '../http-common';
 import getBrowserFingerprint from 'get-browser-fingerprint';
+import VueHcaptcha from '@hcaptcha/vue3-hcaptcha';
 
 export default {
     name: 'ReceiveZec',
     props: {
         payout: Number
     },
+    components: { VueHcaptcha },
     mounted: function() {
         const opt = {
             hardwareOnly: false,
@@ -38,32 +43,51 @@ export default {
         invalid: false,
         greedy: false,
         waitfor: 0,
-        disable_btn: false
+        disable_btn: false,
+        token: '',
+        solveCaptcha: false,
+        invalidCaptcha: false,
+        verified: false
     }),
     methods: {
         claim() {
+            
             // Disable claim button
             this.disable_btn = true;     
             
-            http.post("/add", {address: this.address, fingerprint: this.fingerprint}).then((res) => {                
-                if(res.data === 'syncing') this.syncing = true;
-                else if(res.data === 'success') this.success = true;
-                else if(res.data === 'invalid') this.invalid = true;
-                else if(res.data.startsWith('greedy')) {
-                    this.waitfor = res.data.split(" ")[1];
-                    this.greedy = true;
-                }
-                
-                // Re-enable button and clear messages after 15 seconds
-                setTimeout(()=> {
+            if(!this.verified) {
+                this.solveCaptcha = true;
+            }            
+            else {
+                http.post("/add", {address: this.address, fingerprint: this.fingerprint, token: this.token}).then((res) => {                
+                    if(res.data === 'syncing') this.syncing = true;
+                    else if(res.data === 'success') this.success = true;
+                    else if(res.data === 'invalid') this.invalid = true;
+                    else if(res.data === 'invalid-token') this.invalidCaptcha = true;
+                    else if(res.data.startsWith('greedy')) {
+                        this.waitfor = res.data.split(" ")[1];
+                        this.greedy = true;
+                    }
+                });
+            }
+            // Re-enable button and clear messages after 15 seconds
+            setTimeout(()=> {
                     this.disable_btn = false;
                     this.syncing = false;
                     this.invalid = false;
                     this.success = false;
                     this.greedy = false;
                     this.address = "";
-                }, 15*1000);
-            });
+                    this.solveCaptcha = false;
+                    this.invalidCaptcha = false;
+                }, 15 * 1000);
+        },
+        captcchaVerify(tokenStr) {
+            this.verified = true;
+            this.token = tokenStr;
+        },
+        captchaExpired() {
+            this.verified = false;
         }
     }
 }

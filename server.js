@@ -8,6 +8,11 @@ const https = require('https');
 const fs = require('fs');
 
 const path = require('path');
+const dotenv = require('dotenv');
+dotenv.config();
+
+const {verify} = require('hcaptcha');
+const hc_secret = process.env.HCAPTCHA_SECRET;
 
 const useHttps = false;
 
@@ -24,7 +29,7 @@ const memo = "Thanks for using ZecFaucet.com"
 // Queue for the faucet payout
 let queue = [];
 const waitlist = [];
-const waittime = 15; // Time in minuts before next claim
+const waittime = 30; // Time in minuts before next claim
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json()) // to convert the request into JSON
@@ -43,15 +48,17 @@ let syncing = true;
 zingo.init().then(() => {    
     syncing = false; // Wallet is sync'ed
 
-    // Send payments every 2 minutes
+    // Send payments every 3 minutes
     setInterval(async() => {
-        if(queue.length > 0 && !zingo.getSendProgress().sending) {                                    
+        const sendProgress = zingo.getSendProgress();
+        const ab = zingo.fetchAddressesWithBalance();
+        if(queue.length > 0 && !sendProgress.sending && !ab[0].containsPending) {
             // Sending tx blocks the node event loop, so run in another thread
-            const worker = new Worker(path.join(__dirname, 'send.js'), { workerData: {server: lwd, send: queue} });               
+            // const worker = new Worker(path.join(__dirname, 'send.js'), { workerData: {server: lwd, send: queue} });               
             // clear the queue            
             queue = [];
         }
-    }, 2 * 60 * 1000);
+    }, 3 * 60 * 1000);
 });
 
 // Serve the Vue.js app
@@ -78,13 +85,19 @@ app.get('/balance', (req, res) =>{
     }
 });
 
-app.post('/add', (req, res) => {
+app.post('/add', async (req, res) => {
     if(syncing) res.send('syncing');
     else {
         // CHeck if it is a valid address
         const addr = req.body.address;
         const validAddr = zingo.parseAddress(addr);    
-        if(validAddr) {
+        const token = req.body.token;
+        const validToken = await verify(hc_secret, token);
+        if(!validToken.success) {
+            res.send("invalid-token");
+            return;
+        }
+        else if(validAddr) {
             // First, check if user can claim faucet
             const userIp = req.ip;
             const userFp = req.body.fingerprint;
