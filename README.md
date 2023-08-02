@@ -18,6 +18,10 @@ You'll need rust, openssl-dev and a few other dependencies.
 2) Change directory back to zecfaucet, configure and build the frontend.
 
 Edit `src/http-common.js` and change `baseURL` to your ip address or domain.
+
+Edit `/src/components/ReceiveZec.vue` and change `vue-hcaptcha sitekey` to your hcaptcha site key.
+Edit `.dot` and set `HCAPTCHA_SECRET` to your hcaptcha secret key.
+
 Edit `server.js` if using https change `useHttps` to `true` and configure the certificates at the bottom of the file.
 
 Build the Vue app for distribution
