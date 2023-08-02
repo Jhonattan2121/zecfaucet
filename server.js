@@ -54,7 +54,7 @@ zingo.init().then(() => {
         const ab = zingo.fetchAddressesWithBalance();
         if(queue.length > 0 && !sendProgress.sending && !ab[0].containsPending) {
             // Sending tx blocks the node event loop, so run in another thread
-            // const worker = new Worker(path.join(__dirname, 'send.js'), { workerData: {server: lwd, send: queue} });               
+            const worker = new Worker(path.join(__dirname, 'send.js'), { workerData: {server: lwd, send: queue} });               
             // clear the queue            
             queue = [];
         }

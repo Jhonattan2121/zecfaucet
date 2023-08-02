@@ -8,7 +8,7 @@
     <FaucetBalance v-bind:balance="balance" v-bind:donate="donate" />
     
     <div class="row">
-      <h2>Zcash price:</h2>
+      <!-- <h2>Zcash price:</h2> -->
       
         <coingecko-coin-ticker-widget coin-id="zcash" currency="usd" locale="en" ></coingecko-coin-ticker-widget>    
       
