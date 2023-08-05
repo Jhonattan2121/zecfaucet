@@ -36,13 +36,19 @@ export default {
   },
   data: () => ({
     balance: 0,
-    payout: 0.0,
+    payout: {
+      u: 0.0,
+      z: 0.0,
+      t: 0.0
+    },
     donate: ''
   }),
   methods: {
     getFaucetPayout() {
       http.get('/payout').then((res) => {
-        this.payout = res.data;
+        this.payout.u = res.data.u_pay;
+        this.payout.z = res.data.z_pay;
+        this.payout.t = res.data.t_pay;
       });
     },
     getDonateAddress() {

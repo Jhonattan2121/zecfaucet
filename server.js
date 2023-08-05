@@ -23,7 +23,9 @@ const app = express();
 const port = 2653;
 
 // Set faucet payout in decimal ZEC
-const payout = 0.0005;
+const u_payout = 0.0005;
+const z_payout = 0.0004;
+const t_payout = 0.0003;
 const memo = "Thanks for using ZecFaucet.com"
 
 // Queue for the faucet payout
@@ -52,6 +54,7 @@ zingo.init().then(() => {
     setInterval(async() => {
         const sendProgress = zingo.getSendProgress();
         const ab = zingo.fetchAddressesWithBalance();
+        console.log(`Queue: ${queue.length} | Sending: ${sendProgress.sending} | Pending: ${ab[0].containsPending}`);
         if(queue.length > 0 && !sendProgress.sending && !ab[0].containsPending) {
             // Sending tx blocks the node event loop, so run in another thread
             const worker = new Worker(path.join(__dirname, 'send.js'), { workerData: {server: lwd, send: queue} });               
@@ -67,7 +70,11 @@ zingo.init().then(() => {
 // });
 
 app.get ('/payout', (req, res) =>{
-    res.send(`${payout}`);
+    res.json({
+        u_pay: u_payout,
+        z_pay: z_payout,
+        t_pay: t_payout
+    });
 });
 
 app.get('/donate', (req, res) => {    
@@ -115,15 +122,17 @@ app.post('/add', async (req, res) => {
                 }   
             }
 
+            const pay = validAddr.address_kind === 'unified' ? u_payout.toFixed(4) : validAddr.address_kind === 'sapling' ? z_payout.toFixed(4) : t_payout.toFixed(4);
             // Construct transaction
             const tx = new TxBuilder()
                 .setRecipient(addr)
-                .setAmount(payout)
+                .setAmount(pay)
                 .setMemo(memo);
             
             // Get sendJson
             const sendJson = tx.getSendJSON();
             
+            console.log(sendJson)
             // Add tx to the queue
             queue.push(sendJson[0]);
             
@@ -134,7 +143,10 @@ app.post('/add', async (req, res) => {
                 timestamp: timeStamp
             });
 
-            res.send('success');
+            res.json({
+                success: 'success',
+                amount: pay
+            });
         }
         else res.send('invalid');        
     }

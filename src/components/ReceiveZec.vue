@@ -1,6 +1,10 @@
 <template>    
     <div class="row">        
-        <h3>Enter you Zcash address to receive {{ payout }} ZEC:</h3>
+        <h3>Enter you Zcash address to receive up to {{ payout.u }} ZEC*:</h3>
+        <h5>* Receive {{ payout.u }} ZEC if using Orchard address</h5>
+        <h5>* Receive {{ payout.z }} ZEC if using Sapling address</h5>
+        <h5>* Receive {{ payout.t }} ZEC if using Transparent address</h5>
+        <br/>
         <p>Don't have a Zcash wallet? Find the best wallet <a href="https://z.cash/wallets">here</a>.</p>
         <input class="user-address" type="text" v-model="address">
         <button class="receive-zec" @click="claim" v-bind:disabled="disable_btn">Send</button>
@@ -8,7 +12,7 @@
         <div class="invalid-address" v-if="invalidCaptcha">Sorry, we coudn't verify you're not a robot.</div>
         <div class="invalid-address" v-if="syncing">It looks like the backend wallet is not synchronized! Please wait a few minutes and try again.</div>
         <div class="invalid-address" v-if="invalid">Invalid address! Please verify if you entered your Zcash address corectly and try again.</div>
-        <div class="success" v-if="success">Success! Your address has been added to the payout queue. In a few minutes you will receive {{ payout }} ZEC.</div>
+        <div class="success" v-if="success">Success! Your address has been added to the payout queue. In a few minutes you will receive {{ receive }} ZEC.</div>
         <div class="greedy" v-if="greedy">Please wait {{ waitfor}} minutes before claiming again.</div>
         <vue-hcaptcha sitekey="b72d3642-0e4a-4ed5-b859-4f6100592d26" @verify="captcchaVerify" @expired="captchaExpired"></vue-hcaptcha>
     </div>    
@@ -23,7 +27,7 @@ import VueHcaptcha from '@hcaptcha/vue3-hcaptcha';
 export default {
     name: 'ReceiveZec',
     props: {
-        payout: Number
+        payout: Object
     },
     components: { VueHcaptcha },
     mounted: function() {
@@ -37,6 +41,7 @@ export default {
     },
     data: () =>({
         address: "",
+        receive: 0.0,
         fingerprint: "",
         syncing: false,
         success: false,
@@ -61,7 +66,10 @@ export default {
             else {
                 http.post("/add", {address: this.address, fingerprint: this.fingerprint, token: this.token}).then((res) => {                
                     if(res.data === 'syncing') this.syncing = true;
-                    else if(res.data === 'success') this.success = true;
+                    else if(res.data.success === 'success') {
+                        this.success = true;
+                        this.receive = res.data.amount
+                    }
                     else if(res.data === 'invalid') this.invalid = true;
                     else if(res.data === 'invalid-token') this.invalidCaptcha = true;
                     else if(res.data.startsWith('greedy')) {
@@ -79,7 +87,7 @@ export default {
                     this.greedy = false;
                     this.address = "";
                     this.solveCaptcha = false;
-                    this.invalidCaptcha = false;
+                    this.invalidCaptcha = false;                    
                 }, 15 * 1000);
         },
         captcchaVerify(tokenStr) {
@@ -136,5 +144,9 @@ export default {
     margin-left: auto;
     margin-right: auto;
     padding: 8px;
+}
+h5 {
+    font-size: 16px;    
+    margin:0;
 }
 </style>
