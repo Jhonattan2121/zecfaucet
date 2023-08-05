@@ -115,7 +115,7 @@ export default {
     background-color:coral;
     color: black;
     font-weight: bold;
-    width: 75%;
+    #width: 85%;
     margin-top: 16px;
     margin-bottom: 16px;
     margin-left: auto;
@@ -127,7 +127,7 @@ export default {
     background-color:yellowgreen;
     color: black;
     font-weight: bold;
-    width: 75%;
+    width: 85%;
     margin-top: 16px;
     margin-bottom: 16px;
     margin-left: auto;
@@ -138,7 +138,7 @@ export default {
     background-color:aquamarine;
     color: black;
     font-weight: bold;
-    width: 75%;
+    width: 85%;
     margin-top: 16px;
     margin-bottom: 16px;
     margin-left: auto;
