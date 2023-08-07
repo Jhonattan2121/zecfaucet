@@ -53,8 +53,9 @@ zingo.init().then(() => {
     // Send payments every 3 minutes
     setInterval(async() => {
         const sendProgress = zingo.getSendProgress();
-        const ab = zingo.fetchAddressesWithBalance();
-        console.log(`Queue: ${queue.length} | Sending: ${sendProgress.sending} | Pending: ${ab[0].containsPending}`);
+        const notes = zingo.fetchNotes();
+        const pending = notes.pending_orchard_notes.length > 0 || notes.pending_sapling_notes.length > 0 || notes.pending_utxos.length > 0;
+        console.log(`Queue: ${queue.length} | Sending: ${sendProgress.sending} | Pending: ${pending}`);
         if(queue.length > 0 && !sendProgress.sending && !ab[0].containsPending) {
             // Sending tx blocks the node event loop, so run in another thread
             const worker = new Worker(path.join(__dirname, 'send.js'), { workerData: {server: lwd, send: queue} });               
