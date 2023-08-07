@@ -56,7 +56,7 @@ zingo.init().then(() => {
         const notes = zingo.fetchNotes();
         const pending = notes.pending_orchard_notes.length > 0 || notes.pending_sapling_notes.length > 0 || notes.pending_utxos.length > 0;
         console.log(`Queue: ${queue.length} | Sending: ${sendProgress.sending} | Pending: ${pending}`);
-        if(queue.length > 0 && !sendProgress.sending && !ab[0].containsPending) {
+        if(queue.length > 0 && !sendProgress.sending && !pending) {
             // Sending tx blocks the node event loop, so run in another thread
             const worker = new Worker(path.join(__dirname, 'send.js'), { workerData: {server: lwd, send: queue} });               
             // clear the queue            
