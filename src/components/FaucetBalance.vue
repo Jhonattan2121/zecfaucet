@@ -6,7 +6,11 @@
         
         <h4 class="donate">Donate to ZecFaucet.com:</h4>
         <!-- <textarea class="donation-address" v-model="donate" disabled></textarea> -->
-        <span class="donation-address">{{ donate }}</span>
+        <div class="donation-qr">
+            <img :src="`https://api.qrserver.com/v1/create-qr-code/?size=200x200&margin=8&color=231f20&data=${donate}`">
+            <span class="donation-address">{{ donate }}</span>
+        </div>
+        
         
     </div>
 </template>
@@ -28,8 +32,8 @@ props: {
     width:200px;
     padding: 8px;
     border-radius: 8px;
-    border: 1px solid goldenrod;
-    background-color: gold;
+    border: 1px solid black;
+    background-color: #f9bb00;
     font-weight: bold;
     color: black;
 }
@@ -37,13 +41,18 @@ props: {
 .donate {
     margin-top: 32px;
 }
+.donation-qr {
+    border: 1px solid lightgray;
+    border-radius: 6px;
+    margin-bottom: 32px;
+}
 .donation-address {
-    background-color: lightgrey;
+    background-color: #f7f7f7;
     display: block;
     /* width: 480px; */
     /* height: 180px; */
     padding: 16px;
     overflow-wrap: break-word;
-    margin-bottom: 32px
+    /* margin-bottom: 32px */
 }
 </style>

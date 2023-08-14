@@ -45,6 +45,7 @@ app.set("trust proxy", true);
 const lwd = "https://mainnet.lightwalletd.com:9067/";
 const zingo = new LiteWallet(lwd);
 let syncing = true;
+let count = 0;
 
 // Initialize zingolib
 zingo.init().then(() => {    
@@ -54,13 +55,18 @@ zingo.init().then(() => {
     setInterval(async() => {
         const sendProgress = zingo.getSendProgress();
         const notes = zingo.fetchNotes();
-        const pending = notes.pending_orchard_notes.length > 0 || notes.pending_sapling_notes.length > 0 || notes.pending_utxos.length > 0;
+        let pending = notes.pending_orchard_notes.length > 0 || notes.pending_sapling_notes.length > 0 || notes.pending_utxos.length > 0;
+        if(count > 10) {
+            pending = false;
+            count = 0;
+        }
+        count ++;
         console.log(`Queue: ${queue.length} | Sending: ${sendProgress.sending} | Pending: ${pending}`);
         if(queue.length > 0 && !sendProgress.sending && !pending) {
             // Sending tx blocks the node event loop, so run in another thread
             const worker = new Worker(path.join(__dirname, 'send.js'), { workerData: {server: lwd, send: queue} });               
             // clear the queue            
-            queue = [];
+            worker.on('message', (res) => { if(res === 'ok') queue = [] });
         }
     }, 3 * 60 * 1000);
 });
