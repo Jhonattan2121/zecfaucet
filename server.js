@@ -64,9 +64,10 @@ zingo.init().then(() => {
         console.log(`Queue: ${queue.length} | Sending: ${sendProgress.sending} | Pending: ${pending}`);
         if(queue.length > 0 && !sendProgress.sending && !pending) {
             // Sending tx blocks the node event loop, so run in another thread
-            const worker = new Worker(path.join(__dirname, 'send.js'), { workerData: {server: lwd, send: queue} });               
-            // clear the queue            
-            worker.on('message', (res) => { if(res === 'ok') queue = [] });
+            const worker = new Worker(path.join(__dirname, 'send.js'), { workerData: {server: lwd, send: queue} });
+            worker.on('message', (txid) => { console.log(txid) });
+            // clear the queue
+            queue = [];
         }
     }, 3 * 60 * 1000);
 });
@@ -138,12 +139,22 @@ app.post('/add', async (req, res) => {
             
             // Get sendJson
             const sendJson = tx.getSendJSON();
+
+            // Check if faucet has enough bals
+            const bal = zingo.fetchTotalBalance();
+            const fee = zingo.getDefaultFee();
+            const queueSum = queue.map((el) => el.amount).reduce((acc, curr) => acc + curr, fee);
             
-            console.log(sendJson)
+            if(queueSum + sendJson[0].amount > (bal.total * 10**8)) {
+                res.send('faucet-dry');
+                return;
+            }            
+
+            console.log(sendJson[0].address)
             // Add tx to the queue
             queue.push(sendJson[0]);
             
-            // Add user IP to the wait list
+            // Add user IP and browser firgerprint to the wait list
             waitlist.push({
                 ip: userIp,
                 fp: userFp,

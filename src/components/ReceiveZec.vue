@@ -13,6 +13,7 @@
         <div class="invalid-address" v-if="invalidCaptcha">Sorry, we coudn't verify you're not a robot.</div>
         <div class="invalid-address" v-if="syncing">It looks like the backend wallet is not synchronized! Please wait a few minutes and try again.</div>
         <div class="invalid-address" v-if="invalid">Invalid address! Please verify if you entered your Zcash address corectly and try again.</div>
+        <div class="invalid-address" v-if="dry">It looks like the faucet wallet don't have enough funds :(</div>
         <div class="success" v-if="success">Success! Your address has been added to the payout queue. In a few minutes you will receive {{ receive }} ZEC.</div>
         <div class="greedy" v-if="greedy">Please wait {{ waitfor}} minutes before claiming again.</div>
         <vue-hcaptcha sitekey="b72d3642-0e4a-4ed5-b859-4f6100592d26" @verify="captcchaVerify" @expired="captchaExpired"></vue-hcaptcha>
@@ -47,6 +48,7 @@ export default {
         syncing: false,
         success: false,
         invalid: false,
+        dry: false,
         greedy: false,
         waitfor: 0,
         disable_btn: false,
@@ -70,7 +72,9 @@ export default {
                     else if(res.data.success === 'success') {
                         this.success = true;
                         this.receive = res.data.amount
+                    
                     }
+                    else if(res.data === 'faucet-dry') this.dry = true;
                     else if(res.data === 'invalid') this.invalid = true;
                     else if(res.data === 'invalid-token') this.invalidCaptcha = true;
                     else if(res.data.startsWith('greedy')) {
@@ -86,6 +90,7 @@ export default {
                     this.invalid = false;
                     this.success = false;
                     this.greedy = false;
+                    this.dry = false;
                     this.address = "";
                     this.solveCaptcha = false;
                     this.invalidCaptcha = false;                    
