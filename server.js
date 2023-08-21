@@ -130,7 +130,13 @@ app.post('/add', async (req, res) => {
                 }   
             }
 
-            const pay = validAddr.address_kind === 'unified' ? u_payout.toFixed(4) : validAddr.address_kind === 'sapling' ? z_payout.toFixed(4) : t_payout.toFixed(4);
+            const pay = validAddr.address_kind === 'unified' ? u_payout.toFixed(4) : validAddr.address_kind === 'sapling' ? z_payout.toFixed(4) : 0;
+            // Reject if it's transparent address
+            if(pay == 0) {
+                res.send("transparent");
+                return;
+            }
+            
             // Construct transaction
             const tx = new TxBuilder()
                 .setRecipient(addr)
