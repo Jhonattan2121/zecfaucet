@@ -31,7 +31,7 @@ const memo = "Thanks for using ZecFaucet.com"
 // Queue for the faucet payout
 let queue = [];
 const waitlist = [];
-const waittime = 30; // Time in minuts before next claim
+const waittime = 45; // Time in minuts before next claim
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json()) // to convert the request into JSON
@@ -56,7 +56,7 @@ zingo.init().then(() => {
         const sendProgress = zingo.getSendProgress();
         const notes = zingo.fetchNotes();
         let pending = notes.pending_orchard_notes.length > 0 || notes.pending_sapling_notes.length > 0 || notes.pending_utxos.length > 0;
-        if(count > 10) {
+        if(count > 5) {
             pending = false;
             count = 0;
         }
@@ -65,10 +65,20 @@ zingo.init().then(() => {
         if(queue.length > 0 && !sendProgress.sending && !pending) {
             // Sending tx blocks the node event loop, so run in another thread
             const worker = new Worker(path.join(__dirname, 'send.js'), { workerData: {server: lwd, send: queue} });
-            worker.on('message', (txid) => { console.log(txid) });
+            worker.on('message', (txid) => { console.log(`Transaction ID: ${txid}`) });
             // clear the queue
             queue = [];
         }
+        // Clear waitlist for user that waited more than waittime
+        const timeStamp = new Date();
+        waitlist.forEach((el) => {
+            const oldTimeStamp = el.timestamp;
+            const nextClaim = waittime - ((timeStamp - oldTimeStamp) / (1000*60));
+            if(nextClaim < 0) {
+                waitlist.splice(waitlist.indexOf(el), 1);
+            }
+        });
+        console.log(`Waitlist length: ${waitlist.length}`); 
     }, 3 * 60 * 1000);
 });
 
