@@ -63,13 +63,20 @@ zingo.init().then(() => {
         count ++;
         console.log(`Queue: ${queue.length} | Sending: ${sendProgress.sending} | Pending: ${pending}`);
         if(queue.length > 0 && !sendProgress.sending && !pending) {
+            const tmpQueue = queue;
             // Sending tx blocks the node event loop, so run in another thread
             const worker = new Worker(path.join(__dirname, 'send.js'), { workerData: {server: lwd, send: queue} });
-            worker.on('message', (txid) => { console.log(`Transaction ID: ${txid}`) });
-            // clear the queue
-            queue = [];
+            worker.on('message', (txid) => { 
+                if(!txid.toLowerCase().startsWith("error")) {                    
+                    console.log(`Transaction ID: ${txid}`);
+                    // clear the queue
+                    tmpQueue.forEach((el) => {
+                        queue.splice(queue.indexOf(el), 1);
+                    });
+                }                
+            });            
         }
-        // Clear waitlist for user that waited more than waittime
+        // Clear waitlist for users that waited more than waittime
         const timeStamp = new Date();
         waitlist.forEach((el) => {
             const oldTimeStamp = el.timestamp;
@@ -165,10 +172,10 @@ app.post('/add', async (req, res) => {
                 res.send('faucet-dry');
                 return;
             }            
-
-            console.log(sendJson[0].address)
+            
             // Add tx to the queue
             queue.push(sendJson[0]);
+            console.log("New address added to the queue");
             
             // Add user IP and browser firgerprint to the wait list
             waitlist.push({
