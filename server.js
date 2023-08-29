@@ -43,27 +43,27 @@ app.set("trust proxy", true);
 
 // Setup lib
 const lwd = "https://mainnet.lightwalletd.com:9067/";
-const zingo = new LiteWallet(lwd);
+const zingo = new LiteWallet(lwd, "main");
 let syncing = true;
 let count = 0;
 
 // Initialize zingolib
-zingo.init().then(() => {    
+zingo.init().then(async () => {    
     syncing = false; // Wallet is sync'ed
 
     // Send payments every 3 minutes
     setInterval(async() => {
-        const sendProgress = zingo.getSendProgress();
-        const notes = zingo.fetchNotes();
+        const sendProgress = await zingo.getSendProgress();
+        const notes = await zingo.fetchNotes();
         let pending = notes.pending_orchard_notes.length > 0 || notes.pending_sapling_notes.length > 0 || notes.pending_utxos.length > 0;
-        if(count > 5) {
+        if(count > 2) {
             pending = false;
             count = 0;
         }
         count ++;
         console.log(`Queue: ${queue.length} | Sending: ${sendProgress.sending} | Pending: ${pending}`);
         if(queue.length > 0 && !sendProgress.sending && !pending) {
-            const tmpQueue = queue;
+            const tmpQueue = queue.slice();
             // Sending tx blocks the node event loop, so run in another thread
             const worker = new Worker(path.join(__dirname, 'send.js'), { workerData: {server: lwd, send: queue} });
             worker.on('message', (txid) => { 
@@ -73,8 +73,9 @@ zingo.init().then(() => {
                     tmpQueue.forEach((el) => {
                         queue.splice(queue.indexOf(el), 1);
                     });
-                }                
-            });            
+                }
+            });
+            // queue = [];
         }
         // Clear waitlist for users that waited more than waittime
         const timeStamp = new Date();
@@ -102,17 +103,17 @@ app.get ('/payout', (req, res) =>{
     });
 });
 
-app.get('/donate', (req, res) => {    
-    const addr = zingo.fetchAllAddresses();
+app.get('/donate', async (req, res) => {    
+    const addr = await zingo.fetchAllAddresses();
     res.send(addr[0].address);
 });
 
-app.get('/balance', (req, res) =>{
+app.get('/balance', async (req, res) =>{
     // If syncing, return balance of 0.0
     if(syncing) res.send('0.0');
     else {
         // Fetch total balance and return        
-        const bal = zingo.fetchTotalBalance();        
+        const bal = await zingo.fetchTotalBalance();        
         res.send(`${bal.total.toFixed(8)}`);
     }
 });
@@ -122,7 +123,7 @@ app.post('/add', async (req, res) => {
     else {
         // CHeck if it is a valid address
         const addr = req.body.address;
-        const validAddr = zingo.parseAddress(addr);    
+        const validAddr = awaitzingo.parseAddress(addr);    
         const token = req.body.token;
         const validToken = await verify(hc_secret, token);
         if(!validToken.success) {
@@ -207,9 +208,9 @@ else {
     });
 }
 
-process.on('SIGINT', () => {
+process.on('SIGINT', async () => {
     console.log("Safely shutdown zingolib");
 
-    zingo.deinitialize();
+    await zingo.deinitialize();
     process.exit();
 });
