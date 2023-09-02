@@ -148,7 +148,8 @@ app.post('/add', async (req, res) => {
             const userIp = req.ip;
             const userFp = req.body.fingerprint;
             const timeStamp = new Date();
-            const user = waitlist.filter(el => (el.ip === userIp || el.fp === userFp));
+            
+            const user = waitlist.filter(el => (el.ip === userIp || el.fp === userFp || el.address === addr));
             if(user.length > 0) {
                 const oldTimeStamp = user[0].timestamp;
                 const nextClaim = waittime - ((timeStamp - oldTimeStamp) / (1000*60));
@@ -193,6 +194,7 @@ app.post('/add', async (req, res) => {
             
             // Add user IP and browser firgerprint to the wait list
             waitlist.push({
+                address: addr,
                 ip: userIp,
                 fp: userFp,
                 timestamp: timeStamp
