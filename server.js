@@ -18,6 +18,7 @@ const useHttps = false;
 
 const LiteWallet = require('./zingolib-wrapper/litewallet');
 const { TxBuilder } = require('./zingolib-wrapper/utils/utils');
+const { join } = require('path');
 
 const app = express();
 const port = 2653;
@@ -46,17 +47,21 @@ const lwd = "https://mainnet.lightwalletd.com:9067/";
 const zingo = new LiteWallet(lwd, "main");
 let syncing = true;
 let count = 0;
+let logStream;
 
 // Initialize zingolib
 zingo.init().then(async () => {    
     syncing = false; // Wallet is sync'ed
+
+    // Start the logger
+    logStream = fs.createWriteStream("log.txt", {flags:'a'});
 
     // Send payments every 3 minutes
     setInterval(async() => {
         const sendProgress = await zingo.getSendProgress();
         const notes = await zingo.fetchNotes();
         let pending = notes.pending_orchard_notes.length > 0 || notes.pending_sapling_notes.length > 0 || notes.pending_utxos.length > 0;
-        if(count > 2) {
+        if(count >= 3) {
             pending = false;
             count = 0;
         }
@@ -69,6 +74,10 @@ zingo.init().then(async () => {
             worker.on('message', (txid) => { 
                 if(!txid.toLowerCase().startsWith("error")) {                    
                     console.log(`Transaction ID: ${txid}`);
+                    
+                    // Write txid to log file
+                    logStream.write(`txid: ${txid}\n============\n`);
+
                     // clear the queue
                     tmpQueue.forEach((el) => {
                         queue.splice(queue.indexOf(el), 1);
@@ -108,7 +117,7 @@ app.get('/donate', async (req, res) => {
     res.send(addr[0].address);
 });
 
-app.get('/balance', async (req, res) =>{
+app.get('/balance', async (req, res) => {
     // If syncing, return balance of 0.0
     if(syncing) res.send('0.0');
     else {
@@ -118,12 +127,16 @@ app.get('/balance', async (req, res) =>{
     }
 });
 
+app.get('/log', async (req, res) => {
+    res.sendFile(path.join(__dirname, 'log.txt'));
+});
+
 app.post('/add', async (req, res) => {
     if(syncing) res.send('syncing');
     else {
         // CHeck if it is a valid address
         const addr = req.body.address;
-        const validAddr = awaitzingo.parseAddress(addr);    
+        const validAddr = await zingo.parseAddress(addr);    
         const token = req.body.token;
         const validToken = await verify(hc_secret, token);
         if(!validToken.success) {
@@ -185,6 +198,9 @@ app.post('/add', async (req, res) => {
                 timestamp: timeStamp
             });
 
+            // Add this claim to log file
+            logStream.write(`${timeStamp .toISOString()} | IP: ${userIp} | Fingerprint: ${userFp} | Address: ${addr}\n\n`);
+
             res.json({
                 success: 'success',
                 amount: pay
@@ -210,7 +226,7 @@ else {
 
 process.on('SIGINT', async () => {
     console.log("Safely shutdown zingolib");
-
+    logStream.end();
     await zingo.deinitialize();
     process.exit();
 });
