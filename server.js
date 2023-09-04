@@ -4,6 +4,8 @@ const express = require('express');
 const bodyParser = require('body-parser')
 const cors = require('cors')
 
+const axios = require('axios');
+
 const https = require('https');
 const fs = require('fs');
 
@@ -33,7 +35,6 @@ const memo = "Thanks for using ZecFaucet.com"
 let queue = [];
 const waitlist = [];
 const waittime = 120; // Time in minuts before next claim
-const blacklist = [];
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json()) // to convert the request into JSON
@@ -132,14 +133,6 @@ app.get('/log', async (req, res) => {
     res.sendFile(path.join(__dirname, 'log.txt'));
 });
 
-// Proxy/VPN detection webhook
-app.post('/proxy/webhook', async (req, res) => {
-    const payload = req.body;
-    if(payload.proxy.isProxy || payload.vpn.isVpn) {
-        blacklist.push(payload.ip);        
-    }
-});
-
 app.post('/add', async (req, res) => {
     if(syncing) res.send('syncing');
     else {
@@ -159,12 +152,19 @@ app.post('/add', async (req, res) => {
             const timeStamp = new Date();
             
             // Check if user is using proxy/vpn
-            if(blacklist.includes(userIp.match(/(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$/)[0])) {
-                logStream.write(`Proxy/VPN user blocked.`);                
-                res.send('invalid');
-                return;
+            const ipAddress = userIp.match(/(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$/)[0];             
+            try {
+                const proxyOrVpn = await axios.get(`http://check.getipintel.net/check.php?ip=${ipAddress}&contact=james.j.katz@protonmail.com`);
+                if(proxyOrVpn.data >= 0.95) {
+                    logStream.write(`${timeStamp .toISOString()} | Proxy or VPN blocked: ${ipAddress}\n\n`);
+                    res.send('invalid');
+                    return;
+                }
             }
-
+            catch(err) {
+                console.log("Couldn't check user ip for proxy or vpn.");
+            }
+            
             const user = waitlist.filter(el => (el.ip === userIp || el.fp === userFp || el.address === addr));
             if(user.length > 0) {
                 const oldTimeStamp = user[0].timestamp;
@@ -205,7 +205,7 @@ app.post('/add', async (req, res) => {
             }            
             
             // Add tx to the queue
-            queue.push(sendJson[0]);
+            //queue.push(sendJson[0]);
             console.log("New address added to the queue");
             
             // Add user IP and browser firgerprint to the wait list
