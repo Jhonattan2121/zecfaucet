@@ -32,7 +32,8 @@ const memo = "Thanks for using ZecFaucet.com"
 // Queue for the faucet payout
 let queue = [];
 const waitlist = [];
-const waittime = 45; // Time in minuts before next claim
+const waittime = 120; // Time in minuts before next claim
+const blacklist = [];
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json()) // to convert the request into JSON
@@ -131,6 +132,14 @@ app.get('/log', async (req, res) => {
     res.sendFile(path.join(__dirname, 'log.txt'));
 });
 
+// Proxy/VPN detection webhook
+app.post('/proxy/webhook', async (req, res) => {
+    const payload = req.body;
+    if(payload.proxy.isProxy || payload.vpn.isVpn) {
+        blacklist.push(payload.ip);        
+    }
+});
+
 app.post('/add', async (req, res) => {
     if(syncing) res.send('syncing');
     else {
@@ -145,10 +154,17 @@ app.post('/add', async (req, res) => {
         }
         else if(validAddr) {
             // First, check if user can claim faucet
-            const userIp = req.ip;
+            const userIp = req.ip; // TODO improve remote IP fetching
             const userFp = req.body.fingerprint;
             const timeStamp = new Date();
             
+            // Check if user is using proxy/vpn
+            if(blacklist.includes(userIp.match(/(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$/)[0])) {
+                logStream.write(`Proxy/VPN user blocked.`);                
+                res.send('invalid');
+                return;
+            }
+
             const user = waitlist.filter(el => (el.ip === userIp || el.fp === userFp || el.address === addr));
             if(user.length > 0) {
                 const oldTimeStamp = user[0].timestamp;
