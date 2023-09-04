@@ -8,9 +8,9 @@
         <p>Don't have a Zcash wallet? Find the best wallet <a href="https://z.cash/wallets">here</a>.</p>
         <input class="user-address" type="text" v-model="address">
         <button class="receive-zec" @click="claim" v-bind:disabled="disable_btn">Send</button>
-        <h5>We're experiencing technical difficulties, keep in mind that you may not receive your claim. We apologize for that.</h5>
+        <!-- <h5>We're experiencing technical difficulties, keep in mind that you may not receive your claim. We apologize for that.</h5> -->
         <div class="invalid-address" v-if="solveCaptcha">Please solve the captcha before claiming.</div>
-        <div class="invalid-address" v-if="invalidCaptcha">Sorry, we coudn't verify you're not a robot.</div>
+        <div class="invalid-address" v-if="invalidCaptcha">Sorry, we couldn't verify you're not a robot.</div>
         <div class="invalid-address" v-if="syncing">It looks like the backend wallet is not synchronized! Please wait a few minutes and try again.</div>
         <div class="invalid-address" v-if="invalid">Invalid address! Please verify if you entered your Zcash address corectly and try again.</div>
         <div class="invalid-address" v-if="dry">It looks like the faucet wallet don't have enough funds :(</div>

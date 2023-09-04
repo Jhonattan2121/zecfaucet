@@ -155,6 +155,7 @@ app.post('/add', async (req, res) => {
             const ipAddress = userIp.match(/(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$/)[0];             
             try {
                 const proxyOrVpn = await axios.get(`http://check.getipintel.net/check.php?ip=${ipAddress}&contact=james.j.katz@protonmail.com`);
+                console.log("User blocked!");
                 if(proxyOrVpn.data >= 0.95) {
                     logStream.write(`${timeStamp .toISOString()} | Proxy or VPN blocked: ${ipAddress}\n\n`);
                     res.send('invalid');
@@ -205,7 +206,7 @@ app.post('/add', async (req, res) => {
             }            
             
             // Add tx to the queue
-            //queue.push(sendJson[0]);
+            queue.push(sendJson[0]);
             console.log("New address added to the queue");
             
             // Add user IP and browser firgerprint to the wait list
