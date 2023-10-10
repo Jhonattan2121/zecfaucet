@@ -52,8 +52,6 @@ let logStream;
 
 // Initialize zingolib
 zingo.init().then(async () => {    
-    // syncing = false; // Wallet is sync'ed
-
     // Start the logger
     logStream = fs.createWriteStream("log.txt", {flags:'a'});
 
@@ -62,9 +60,11 @@ zingo.init().then(async () => {
         const sendProgress = await zingo.getSendProgress();
         const notes = await zingo.fetchNotes();
         let pending = notes.pending_orchard_notes.length > 0 || notes.pending_sapling_notes.length > 0 || notes.pending_utxos.length > 0;
-       
-        console.log(`Queue: ${queue.length} | Sending: ${sendProgress.sending} | Pending: ${pending}`);
-        if(queue.length > 0 && !sendProgress.sending && !pending) {
+        const ss = await zingo.getSyncStatus();
+        syncing = ss.in_progress;
+
+        console.log(`Queue: ${queue.length} | Sending: ${sendProgress.sending} | Pending: ${pending} | Syncing: ${syncing}`);
+        if(queue.length > 0 && !sendProgress.sending && !pending && !syncing) {
             const tmpQueue = queue.slice();  
 
             zingo.sendTransaction(tmpQueue).then((txid)=>{
@@ -113,8 +113,9 @@ app.get('/donate', async (req, res) => {
 
 app.get('/balance', async (req, res) => {
     // If syncing, return balance of 0.0
-    syncing = await zingo.getSyncStatus().in_progress;
-    
+    const ss = await zingo.getSyncStatus();
+    syncing = ss.in_progress;
+
     if(syncing) res.send('0.0');
     else {
         // Fetch total balance and return        
@@ -128,7 +129,8 @@ app.get('/log', async (req, res) => {
 });
 
 app.post('/add', async (req, res) => {
-    syncing = await zingo.getSyncStatus().in_progress;
+    const ss = await zingo.getSyncStatus();
+    syncing = ss.in_progress; 
 
     if(syncing) res.send('syncing');
     else {
@@ -154,7 +156,7 @@ app.post('/add', async (req, res) => {
                 console.log("User blocked!");
                 if(proxyOrVpn.data >= 0.95) {
                     logStream.write(`${timeStamp .toISOString()} | Proxy or VPN blocked: ${ipAddress}\n\n`);
-                    res.send('invalid');
+                    res.send('invalid-token');
                     return;
                 }
             }
@@ -180,7 +182,7 @@ app.post('/add', async (req, res) => {
             let seqIp = waitlist.filter((el) => el.ip.startsWith(ipOctet));
             if(seqIp.length > 0) {
                 logStream.write(`${timeStamp .toISOString()} | Sequential IP blocked: ${ipAddress}\n\n`);
-                res.send('invalid');
+                res.send('invalid-token');
                 return;
             }
 
