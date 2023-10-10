@@ -48,47 +48,24 @@ app.set("trust proxy", true);
 const lwd = "https://mainnet.lightwalletd.com:9067/";
 const zingo = new LiteWallet(lwd, "main");
 let syncing = true;
-// let count = 0;
 let logStream;
 
 // Initialize zingolib
 zingo.init().then(async () => {    
-    syncing = false; // Wallet is sync'ed
+    // syncing = false; // Wallet is sync'ed
 
     // Start the logger
     logStream = fs.createWriteStream("log.txt", {flags:'a'});
 
-    // Send payments every 3 minutes
-    setInterval(async() => {
+    // Send payments every 2 minutes
+    const timerID = setInterval(async() => {
         const sendProgress = await zingo.getSendProgress();
         const notes = await zingo.fetchNotes();
         let pending = notes.pending_orchard_notes.length > 0 || notes.pending_sapling_notes.length > 0 || notes.pending_utxos.length > 0;
-        // if(count >= 3) {
-        //     pending = false;
-        //     count = 0;
-        // }
-        // count ++;
+       
         console.log(`Queue: ${queue.length} | Sending: ${sendProgress.sending} | Pending: ${pending}`);
         if(queue.length > 0 && !sendProgress.sending && !pending) {
-            const tmpQueue = queue.slice();
-            // Sending tx blocks the node event loop, so run in another thread
-            // const worker = new Worker(path.join(__dirname, 'send.js'), { workerData: {server: lwd, send: queue} });
-            // worker.on('message', (txid) => { 
-            //     if(!txid.toLowerCase().startsWith("error")) {                    
-            //         console.log(`Transaction ID: ${txid}`);
-                    
-            //         // Write txid to log file
-            //         logStream.write(`txid: ${txid}\n============\n`);
-
-            //         // clear the queue
-            //         tmpQueue.forEach((el) => {
-            //             queue.splice(queue.indexOf(el), 1);
-            //         });
-            //     }
-            //     else {
-            //         console.log(txid);
-            //     }
-            // });
+            const tmpQueue = queue.slice();  
 
             zingo.sendTransaction(tmpQueue).then((txid)=>{
                 console.log(txid);
@@ -101,9 +78,8 @@ zingo.init().then(async () => {
             }).catch((err) => {
                 console.log(err);
             });
-
-            // queue = [];
         }
+
         // Clear waitlist for users that waited more than waittime
         const timeStamp = new Date();
         waitlist.forEach((el) => {
@@ -137,6 +113,8 @@ app.get('/donate', async (req, res) => {
 
 app.get('/balance', async (req, res) => {
     // If syncing, return balance of 0.0
+    syncing = await zingo.getSyncStatus().in_progress;
+    
     if(syncing) res.send('0.0');
     else {
         // Fetch total balance and return        
@@ -150,6 +128,8 @@ app.get('/log', async (req, res) => {
 });
 
 app.post('/add', async (req, res) => {
+    syncing = await zingo.getSyncStatus().in_progress;
+
     if(syncing) res.send('syncing');
     else {
         // CHeck if it is a valid address
