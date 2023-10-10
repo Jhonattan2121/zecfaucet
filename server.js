@@ -48,7 +48,7 @@ app.set("trust proxy", true);
 const lwd = "https://mainnet.lightwalletd.com:9067/";
 const zingo = new LiteWallet(lwd, "main");
 let syncing = true;
-let count = 0;
+// let count = 0;
 let logStream;
 
 // Initialize zingolib
@@ -63,29 +63,45 @@ zingo.init().then(async () => {
         const sendProgress = await zingo.getSendProgress();
         const notes = await zingo.fetchNotes();
         let pending = notes.pending_orchard_notes.length > 0 || notes.pending_sapling_notes.length > 0 || notes.pending_utxos.length > 0;
-        if(count >= 3) {
-            pending = false;
-            count = 0;
-        }
-        count ++;
+        // if(count >= 3) {
+        //     pending = false;
+        //     count = 0;
+        // }
+        // count ++;
         console.log(`Queue: ${queue.length} | Sending: ${sendProgress.sending} | Pending: ${pending}`);
         if(queue.length > 0 && !sendProgress.sending && !pending) {
             const tmpQueue = queue.slice();
             // Sending tx blocks the node event loop, so run in another thread
-            const worker = new Worker(path.join(__dirname, 'send.js'), { workerData: {server: lwd, send: queue} });
-            worker.on('message', (txid) => { 
-                if(!txid.toLowerCase().startsWith("error")) {                    
-                    console.log(`Transaction ID: ${txid}`);
+            // const worker = new Worker(path.join(__dirname, 'send.js'), { workerData: {server: lwd, send: queue} });
+            // worker.on('message', (txid) => { 
+            //     if(!txid.toLowerCase().startsWith("error")) {                    
+            //         console.log(`Transaction ID: ${txid}`);
                     
-                    // Write txid to log file
-                    logStream.write(`txid: ${txid}\n============\n`);
+            //         // Write txid to log file
+            //         logStream.write(`txid: ${txid}\n============\n`);
 
-                    // clear the queue
-                    tmpQueue.forEach((el) => {
-                        queue.splice(queue.indexOf(el), 1);
-                    });
-                }
+            //         // clear the queue
+            //         tmpQueue.forEach((el) => {
+            //             queue.splice(queue.indexOf(el), 1);
+            //         });
+            //     }
+            //     else {
+            //         console.log(txid);
+            //     }
+            // });
+
+            zingo.sendTransaction(tmpQueue).then((txid)=>{
+                console.log(txid);
+                logStream.write(`txid: ${txid}\n============\n`);
+
+                // clear the queue
+                tmpQueue.forEach((el) => {
+                    queue.splice(queue.indexOf(el), 1);
+                });
+            }).catch((err) => {
+                console.log(err);
             });
+
             // queue = [];
         }
         // Clear waitlist for users that waited more than waittime
@@ -98,7 +114,7 @@ zingo.init().then(async () => {
             }
         });
         console.log(`Waitlist length: ${waitlist.length}`); 
-    }, 3 * 60 * 1000);
+    }, 2 * 60 * 1000);
 });
 
 // Serve the Vue.js app
@@ -166,15 +182,6 @@ app.post('/add', async (req, res) => {
                 console.log("Couldn't check user ip for proxy or vpn.");
             }
 
-            // Also block sequential IP addresses based on the first 2 octets
-            let ipOctet = userIp.slice(0,15);
-            let seqIp = waitlist.filter((el) => el.ip.startsWith(ipOctet));
-            if(seqIp.length > 0) {
-                logStream.write(`${timeStamp .toISOString()} | Sequential IP blocked: ${ipAddress}\n\n`);
-                res.send('invalid');
-                return;
-            }
-            
             const user = waitlist.filter(el => (el.ip === userIp || el.fp === userFp || el.address === addr));
             if(user.length > 0) {
                 const oldTimeStamp = user[0].timestamp;
@@ -186,6 +193,15 @@ app.post('/add', async (req, res) => {
                     res.send(`greedy ${ Math.ceil(nextClaim) }`);                
                     return;
                 }   
+            }
+
+            // Also block sequential IP addresses based on the first 2 octets
+            let ipOctet = userIp.slice(0,15);
+            let seqIp = waitlist.filter((el) => el.ip.startsWith(ipOctet));
+            if(seqIp.length > 0) {
+                logStream.write(`${timeStamp .toISOString()} | Sequential IP blocked: ${ipAddress}\n\n`);
+                res.send('invalid');
+                return;
             }
 
             const pay = validAddr.address_kind === 'unified' ? u_payout.toFixed(4) : validAddr.address_kind === 'sapling' ? z_payout.toFixed(4) : 0;

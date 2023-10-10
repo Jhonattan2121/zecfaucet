@@ -7,4 +7,7 @@ const zingo = new LiteWallet(workerData.server);
 zingo.sendTransaction(workerData.send).then((txid)=>{
     // console.log(txid);
     parentPort.postMessage(`${txid}`);
-}).catch((err) => {console.log(err)});
+}).catch((err) => {
+    // console.log(err);
+    parentPort.postMessage(`${err}`);
+});
