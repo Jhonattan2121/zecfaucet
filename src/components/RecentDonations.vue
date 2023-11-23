@@ -14,7 +14,7 @@
                     <tr v-for="(donation, i) in donations" :key="i">
                         <td>{{donation.txDetails[0].amount}} ZEC</td>
                         <td>{{ new Date(donation.time * 1000).toLocaleDateString() }} {{ new Date(donation.time * 1000).toLocaleTimeString() }}</td>
-                        <td>{{ donation.txDetails[0].memos[0] }}</td>
+                        <td>{{ donation.txDetails[0].memos ? donation.txDetails[0].memos[0] : "No memo avaiable" }}</td>
                     </tr>
                 </tbody>
             </table>
@@ -36,7 +36,7 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
 .donations {
-    margin-top: 32px;
+    margin-top: 8px;
 }
 .donation-list {
     border: 1px solid lightgray;
