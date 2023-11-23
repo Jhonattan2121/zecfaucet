@@ -6,6 +6,8 @@
     <ReceiveZec v-bind:payout="payout"/>
 
     <FaucetBalance v-bind:balance="balance" v-bind:donate="donate" />
+
+    <RecentDonations v-bind:donations="donations" />
     
     <div class="row">
       <!-- <h2>Zcash price:</h2> -->
@@ -21,18 +23,21 @@
 <script>
 import FaucetBalance from './components/FaucetBalance.vue'
 import ReceiveZec from './components/ReceiveZec.vue'
+import RecentDonations from './components/RecentDonations.vue';
 import http from './http-common';
 
 export default {
   name: 'App',
-  components: {    
+  components: {
     FaucetBalance,
-    ReceiveZec
-  },
+    ReceiveZec,
+    RecentDonations
+},
   mounted: function() {
     this.getFaucetPayout();
     this.getDonateAddress();
     this.updateFaucetBalance();
+    this.updateLatestDonations();
   },
   data: () => ({
     balance: 0,
@@ -41,7 +46,8 @@ export default {
       z: 0.0,
       t: 0.0
     },
-    donate: ''
+    donate: '',
+    donations: []
   }),
   methods: {
     getFaucetPayout() {
@@ -65,6 +71,17 @@ export default {
       this.getFaucetBalance();
       setInterval(() => {
         this.getFaucetBalance();
+      }, 75 * 1000);
+    },
+    getLatestDonations() {
+      http.get('/txns').then((res)=>{
+        this.donations = res.data;
+      });
+    },
+    updateLatestDonations() {
+      this.getLatestDonations();
+      setInterval(() => {
+        this.getLatestDonations();
       }, 75 * 1000);
     }
   }

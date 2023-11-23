@@ -128,6 +128,12 @@ app.get('/log', async (req, res) => {
     res.sendFile(path.join(__dirname, 'log.txt'));
 });
 
+app.get('/txns', async (req, res) => {
+    await zingo.fetchTandZandOTransactionsSummaries();
+    const txList = zingo.transactionsList.filter((t) => t.type == "Received")
+    res.json(txList.slice(0,10));
+});
+
 app.post('/add', async (req, res) => {
     const ss = await zingo.getSyncStatus();
     syncing = ss.in_progress; 
