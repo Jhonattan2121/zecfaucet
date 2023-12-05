@@ -25,6 +25,7 @@ import FaucetBalance from './components/FaucetBalance.vue'
 import ReceiveZec from './components/ReceiveZec.vue'
 import RecentDonations from './components/RecentDonations.vue';
 import http from './http-common';
+import '@/styles.css'
 
 export default {
   name: 'App',
@@ -88,16 +89,4 @@ export default {
 }
 </script>
 
-<style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-  width: 80%;
-  margin-left: auto;
-  margin-right: auto;
-}
-</style>
+

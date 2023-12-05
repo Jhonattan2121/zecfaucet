@@ -1,0 +1,48 @@
+.alert-container {
+    width: 85%;
+    margin: 16px auto;
+    padding: 8px;
+    font-weight: bold;
+    color: black;
+}
+
+.invalid-address {
+    background-color: coral;
+}
+
+.success {
+    background-color: yellowgreen;
+}
+
+.greedy {
+    background-color: aquamarine;
+}
+
+.user-address {
+  background-color: black;
+    padding: 8px;
+    width: 75%;
+}
+
+.user-address::placeholder {
+    color: #757575; 
+    font-style: italic; 
+  }
+  
+  .user-address:focus {
+    outline: none; 
+   
+  }
+
+.receive-zec,
+h5 {
+    font-size: 16px;
+    margin: 0;
+    color: black;
+   
+}
+
+.receive-zec {
+    background-color: rgb(158, 157, 157);
+}
+

@@ -25,6 +25,7 @@
 </template>
   
 <script>
+import '@/components/RecentDonationsStyles.css'
 export default {
     name: 'RecentDonations',
     props: {
@@ -33,23 +34,4 @@ export default {
 }
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
-.donations {
-    margin-top: 8px;
-}
-.donation-list {
-    border: 1px solid lightgray;
-    border-radius: 6px;
-    margin-bottom: 32px;
-    padding: 16px;
-}
-table {
-  border: 0px;
-  border-collapse: collapse;
-  margin: 0;
-  padding: 0;
-  width: 100%;
-  table-layout: fixed;
-}
-</style>
+
