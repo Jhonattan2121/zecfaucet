@@ -16,6 +16,7 @@
 </template>
   
 <script>
+import '@/components/FaucetBalanceStyles.css'
 export default {
 name: 'FaucetBalance',
 props: {
@@ -25,34 +26,4 @@ props: {
 }
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
-.faucet-balance {
-    display: inline-block;
-    width:200px;
-    padding: 8px;
-    border-radius: 8px;
-    border: 1px solid black;
-    background-color: #f9bb00;
-    font-weight: bold;
-    color: black;
-}
 
-.donate {
-    margin-top: 32px;
-}
-.donation-qr {
-    border: 1px solid lightgray;
-    border-radius: 6px;
-    margin-bottom: 32px;
-}
-.donation-address {
-    background-color: #f7f7f7;
-    display: block;
-    /* width: 480px; */
-    /* height: 180px; */
-    padding: 16px;
-    overflow-wrap: break-word;
-    /* margin-bottom: 32px */
-}
-</style>

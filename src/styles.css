@@ -1,0 +1,77 @@
+body {
+  background-color: #f1f1f1; 
+
+}
+
+#app {
+    font-family: Avenir, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-align: center;
+    color: #000000;
+    margin-top: 60px;
+    width: 80%;
+    margin-left: auto;
+    margin-right: auto;
+    
+  }
+
+  .container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    text-align: center;
+   
+  }
+  
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+  
+  h1 {
+    color: #000000;
+    font-size: 24px;
+    margin-bottom: 20px;
+  }
+  
+  .row {
+    margin-top: 1px;
+  }
+  
+  .coingecko-coin-ticker-widget {
+    margin-top: 20px;
+    color: #000000;
+  }
+  
+  p {
+    font-size: medium;
+   
+    color: #000000;
+  }
+
+body::-webkit-scrollbar {
+  width: 12px;
+}
+
+body::-webkit-scrollbar-thumb {
+  background-color: #6d6c6c; 
+  border-radius: 6px;
+}
+
+body::-webkit-scrollbar-track {
+  background-color: #3a3a3a; 
+}
+
+body::-moz-scrollbar {
+  width: 12px;
+}
+
+body::-moz-scrollbar-thumb {
+  background-color: #6d6c6c; 
+  border-radius: 6px;
+}
+
+body::-moz-scrollbar-track {
+  background-color: #3a3a3a; 
+}

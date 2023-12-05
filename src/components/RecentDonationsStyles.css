@@ -1,0 +1,17 @@
+.donations {
+    margin-top: 8px;
+}
+.donation-list {
+    border: 1px solid rgb(0, 0, 0);
+    border-radius: 6px;
+    margin-bottom: 32px;
+    padding: 16px;
+}
+table {
+  border: 0px;
+  border-collapse: collapse;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  table-layout: fixed;
+}

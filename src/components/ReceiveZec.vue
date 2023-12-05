@@ -26,7 +26,7 @@
 import http from '../http-common';
 import getBrowserFingerprint from 'get-browser-fingerprint';
 import VueHcaptcha from '@hcaptcha/vue3-hcaptcha';
-
+import '@/components/ReceiveZecStyles.css'
 export default {
     name: 'ReceiveZec',
     props: {
@@ -111,52 +111,4 @@ export default {
 }
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
-.user-address {    
-    padding: 16px;
-    width: 75%;
-}
 
-.receive-zec {    
-    font-size: 16px;    
-}
-.invalid-address {
-    background-color:coral;
-    color: black;
-    font-weight: bold;
-    #width: 85%;
-    margin-top: 16px;
-    margin-bottom: 16px;
-    margin-left: auto;
-    margin-right: auto;
-    padding: 8px;
-}
-
-.success {
-    background-color:yellowgreen;
-    color: black;
-    font-weight: bold;
-    width: 85%;
-    margin-top: 16px;
-    margin-bottom: 16px;
-    margin-left: auto;
-    margin-right: auto;
-    padding: 8px;
-}
-.greedy {
-    background-color:aquamarine;
-    color: black;
-    font-weight: bold;
-    width: 85%;
-    margin-top: 16px;
-    margin-bottom: 16px;
-    margin-left: auto;
-    margin-right: auto;
-    padding: 8px;
-}
-h5 {
-    font-size: 16px;    
-    margin:0;
-}
-</style>
