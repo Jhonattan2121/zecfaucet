@@ -1,17 +1,44 @@
+
+.row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 20px;
+}
+
 .donations {
-    margin-top: 8px;
+  font-size: 1.5em;
+  margin-bottom: 10px;
 }
+
 .donation-list {
-    border: 1px solid rgb(0, 0, 0);
-    border-radius: 6px;
-    margin-bottom: 32px;
-    padding: 16px;
-}
-table {
-  border: 0px;
-  border-collapse: collapse;
-  margin: 0;
-  padding: 0;
   width: 100%;
-  table-layout: fixed;
+  overflow-x: auto; 
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+th, td {
+  padding: 8px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+th {
+  background-color: #f2f2f2;
+}
+
+@media (max-width: 600px) {
+  .donations {
+    font-size: 1.3em;
+  }
+
+  table {
+    font-size: 0.9em;
+  }
 }
