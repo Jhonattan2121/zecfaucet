@@ -1,48 +1,85 @@
-.alert-container {
-    width: 85%;
-    margin: 16px auto;
-    padding: 8px;
-    font-weight: bold;
-    color: black;
+.row {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 20px;
 }
 
-.invalid-address {
-    background-color: coral;
+h3 {
+    font-size: 1.5em;
+    margin-bottom: 10px;
 }
 
-.success {
-    background-color: yellowgreen;
+h5 {
+    font-size: 1.2em;
+    margin-bottom: 5px;
 }
 
-.greedy {
-    background-color: aquamarine;
+p {
+    font-size: 1em;
+    margin-top: 10px;
 }
 
 .user-address {
-  background-color: black;
+    margin-top: 10px;
     padding: 8px;
-    width: 75%;
-}
-
-.user-address::placeholder {
-    color: #757575; 
-    font-style: italic; 
-  }
-  
-  .user-address:focus {
-    outline: none; 
-   
-  }
-
-.receive-zec,
-h5 {
-    font-size: 16px;
-    margin: 0;
-    color: black;
-   
+    font-size: 1em;
+    width: 70%;
+    box-sizing: border-box;
 }
 
 .receive-zec {
-    background-color: rgb(158, 157, 157);
+
+    font-size: 1.2em;
+    background-color: #3498db;
+    color: #ffffff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
 }
 
+.receive-zec:disabled {
+    background-color: #bdc3c7;
+    color: #7f8c8d;
+    cursor: not-allowed;
+}
+
+.receive-zec:hover:not([disabled]) {
+    background-color: #2980b9;
+}
+
+.invalid-address {
+    margin-top: 10px;
+    color: #d9534f;
+}
+
+.success {
+    margin-top: 10px;
+    color: #5bc0de;
+}
+
+.greedy {
+    margin-top: 10px;
+    color: #f0ad4e;
+}
+
+.vue-hcaptcha {
+    margin-top: 20px;
+}
+
+@media (max-width: 600px) {
+    h3 {
+        font-size: 1.3em;
+    }
+
+    h5 {
+        font-size: 1em;
+    }
+
+    .user-address,
+    .receive-zec {
+        width: 100%;
+    }
+}
