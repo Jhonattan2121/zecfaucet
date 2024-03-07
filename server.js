@@ -18,7 +18,7 @@ const hc_secret = process.env.HCAPTCHA_SECRET;
 
 const useHttps = false;
 
-const LiteWallet = require('./zingolib-wrapper/litewallet');
+const LiteWallet = require('./zingolib-wrapper/zingo_litewallet');
 const { TxBuilder } = require('./zingolib-wrapper/utils/utils');
 const { join } = require('path');
 
@@ -57,10 +57,10 @@ zingo.init().then(async () => {
 
     // Send payments every 2 minutes
     const timerID = setInterval(async() => {
-        const sendProgress = await zingo.getSendProgress();
+        const sendProgress = await zingo.doSendProgress();
         const notes = await zingo.fetchNotes();
         let pending = notes.pending_orchard_notes.length > 0 || notes.pending_sapling_notes.length > 0 || notes.pending_utxos.length > 0;
-        const ss = await zingo.getSyncStatus();
+        const ss = await zingo.doSyncStatus();
         syncing = ss.in_progress;
 
         console.log(`Queue: ${queue.length} | Sending: ${sendProgress.sending} | Pending: ${pending} | Syncing: ${syncing}`);
@@ -113,7 +113,7 @@ app.get('/donate', async (req, res) => {
 
 app.get('/balance', async (req, res) => {
     // If syncing, return balance of 0.0
-    const ss = await zingo.getSyncStatus();
+    const ss = await zingo.doSyncStatus();
     syncing = ss.in_progress;
 
     if(syncing) res.send('0.0');
@@ -135,7 +135,7 @@ app.get('/txns', async (req, res) => {
 });
 
 app.post('/add', async (req, res) => {
-    const ss = await zingo.getSyncStatus();
+    const ss = await zingo.doSyncStatus();
     syncing = ss.in_progress; 
 
     if(syncing) res.send('syncing');
