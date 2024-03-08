@@ -57,14 +57,13 @@ zingo.init().then(async () => {
 
     // Send payments every 2 minutes
     const timerID = setInterval(async() => {
-        const sendProgress = await zingo.doSendProgress();
+        const sendProgress = zingo.inSend;
         const notes = await zingo.fetchNotes();
-        let pending = notes.pending_orchard_notes.length > 0 || notes.pending_sapling_notes.length > 0 || notes.pending_utxos.length > 0;
-        const ss = await zingo.doSyncStatus();
-        syncing = ss.in_progress;
+        let pending = notes.pending_orchard_notes.length > 0 || notes.pending_sapling_notes.length > 0 || notes.pending_utxos.length > 0;        
+        syncing = zingo.inRefresh;
 
-        console.log(`Queue: ${queue.length} | Sending: ${sendProgress.sending} | Pending: ${pending} | Syncing: ${syncing}`);
-        if(queue.length > 0 && !sendProgress.sending && !pending && !syncing) {
+        console.log(`Queue: ${queue.length} | Sending: ${sendProgress} | Pending: ${pending} | Syncing: ${syncing}`);
+        if(queue.length > 0 && !sendProgress && !pending && !syncing) {
             const tmpQueue = queue.slice();  
 
             zingo.sendTransaction(tmpQueue).then((txid)=>{
