@@ -118,7 +118,8 @@ app.get('/balance', async (req, res) => {
     if(syncing) res.send('0.0');
     else {
         // Fetch total balance and return        
-        const bal = await zingo.fetchTotalBalance();        
+        // const bal = await zingo.fetchTotalBalance();        
+        const bal = await zingo.totalBalance;
         res.send(`${bal.total.toFixed(8)}`);
     }
 });
@@ -128,7 +129,7 @@ app.get('/log', async (req, res) => {
 });
 
 app.get('/txns', async (req, res) => {
-    await zingo.fetchTandZandOTransactionsSummaries();
+    // await zingo.fetchTandZandOTransactionsSummaries();
     const txList = zingo.transactionsList.filter((t) => t.type == "Received")
     res.json(txList.slice(0,10));
 });
@@ -208,8 +209,8 @@ app.post('/add', async (req, res) => {
             const sendJson = tx.getSendJSON();
 
             // Check if faucet has enough bals
-            const bal = zingo.fetchTotalBalance();
-            const fee = zingo.getDefaultFee();
+            const bal = await zingo.fetchTotalBalance();
+            const fee = await zingo.getDefaultFee();
             const queueSum = queue.map((el) => el.amount).reduce((acc, curr) => acc + curr, fee);
             
             if(queueSum + sendJson[0].amount > (bal.total * 10**8)) {
