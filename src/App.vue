@@ -7,6 +7,8 @@
 
     <FaucetBalance v-bind:balance="balance" v-bind:donate="donate" />
 
+    <FaucetStats v-bind:stats="stats" />
+
     <RecentDonations v-bind:donations="donations" />
     
     <div class="row">
@@ -22,6 +24,7 @@
 
 <script>
 import FaucetBalance from './components/FaucetBalance.vue'
+import FaucetStats from './components/FaucetStats.vue'
 import ReceiveZec from './components/ReceiveZec.vue'
 import RecentDonations from './components/RecentDonations.vue';
 import http from './http-common';
@@ -31,6 +34,7 @@ export default {
   name: 'App',
   components: {
     FaucetBalance,
+    FaucetStats,
     ReceiveZec,
     RecentDonations
 },
@@ -48,7 +52,8 @@ export default {
       t: 0.0
     },
     donate: '',
-    donations: []
+    donations: [],
+    stats: {}
   }),
   methods: {
     getFaucetPayout() {
@@ -77,6 +82,9 @@ export default {
     getLatestDonations() {
       http.get('/txns').then((res)=>{
         this.donations = res.data;
+      });
+      http.get('/stats').then((res)=>{
+        this.stats = res.data;
       });
     },
     updateLatestDonations() {

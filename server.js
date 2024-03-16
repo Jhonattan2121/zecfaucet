@@ -46,7 +46,7 @@ app.set("trust proxy", true);
 
 // Setup lib
 const lwd = "https://mainnet.lightwalletd.com:9067/";
-const zingo = new LiteWallet(lwd, "main");
+const zingo = new LiteWallet(lwd, "main", false);
 let syncing = true;
 let logStream;
 
@@ -119,7 +119,7 @@ app.get('/balance', async (req, res) => {
     else {
         // Fetch total balance and return        
         // const bal = await zingo.fetchTotalBalance();        
-        const bal = await zingo.totalBalance;
+        const bal = zingo.totalBalance;
         res.send(`${bal.total.toFixed(8)}`);
     }
 });
@@ -132,6 +132,19 @@ app.get('/txns', async (req, res) => {
     // await zingo.fetchTandZandOTransactionsSummaries();
     const txList = zingo.transactionsList.filter((t) => t.type == "Received")
     res.json(txList.slice(0,10));
+});
+
+app.get('/stats', async (req, res) => {
+    await zingo.fetchTandZandOTransactionsSummaries();
+    const txList = zingo.transactionsList.filter((t) => t.type == "Sent")
+    
+    const totalSent = txList.reduce((acc, el) => acc + el.txDetails[0].amount, 0);
+    const totalClaims = txList.length;
+    const result = {
+        sent: totalSent.toFixed(8),
+        claims: totalClaims
+    }
+    res.json(result);
 });
 
 app.post('/add', async (req, res) => {
